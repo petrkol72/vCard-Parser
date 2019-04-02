@@ -1,4 +1,4 @@
-use v6.c;
+use v6.d;
 unit class vCard::Parser:ver<0.0.1>;
 
 =begin pod

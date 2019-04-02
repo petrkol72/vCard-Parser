@@ -7,7 +7,7 @@
   "description" : "a basic parser of vCard",
   "license" : "Artistic-2.0",
   "name" : "vCard::Parser",
-  "perl" : "6.c",
+  "perl" : "6.d",
   "provides" : {
     "vCard::Parser" : "lib/vCard/Parser.pm6",
     "vCard::Parser::Actions" : "lib/vCard/Parser/Actions.pm6",
