@@ -21,7 +21,7 @@ vCard::Parser is basic parser of vCard version 4.0 and it's convertor to JSON fo
 
 =head1 AUTHOR
 
- <Petr Kolář>
+ Petr Kolář <petrkol72@seznam.cz>
 
 =head1 COPYRIGHT AND LICENSE
 
