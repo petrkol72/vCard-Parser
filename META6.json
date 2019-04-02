@@ -1,0 +1,19 @@
+{
+  "authors" : [
+    "Petr Kol\u00e1\u0159"
+  ],
+  "build-depends" : [ ],
+  "depends" : [ ],
+  "description" : "blah blah blah",
+  "license" : "Artistic-2.0",
+  "name" : "vCard::Parser",
+  "perl" : "6.c",
+  "provides" : {
+    "vCard::Parser" : "lib/vCard/Parser.pm6"
+  },
+  "resources" : [ ],
+  "source-url" : "",
+  "tags" : [ ],
+  "test-depends" : [ ],
+  "version" : "0.0.1"
+}
