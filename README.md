@@ -3,7 +3,7 @@
 NAME
 ====
 
-vCard::Parser
+vCard::Parser - a basic parser of vCard
 
 SYNOPSIS
 ========
@@ -15,7 +15,7 @@ use vCard::Parser;
 DESCRIPTION
 ===========
 
-vCard::Parser is basic parser of vCard version 4.0 and it's convertor to JSON format.
+vCard::Parser is a basic parser of vCard version 4.0 and it's convertor to JSON format.
 
 AUTHOR
 ======

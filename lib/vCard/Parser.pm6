@@ -5,7 +5,7 @@ unit class vCard::Parser:ver<0.0.1>;
 
 =head1 NAME
 
-vCard::Parser
+vCard::Parser - a basic parser of vCard
 
 =head1 SYNOPSIS
 
@@ -17,7 +17,7 @@ use vCard::Parser;
 
 =head1 DESCRIPTION
 
-vCard::Parser is basic parser of vCard version 4.0 and it's convertor to JSON format.
+vCard::Parser is a basic parser of vCard version 4.0 and it's convertor to JSON format.
 
 =head1 AUTHOR
 

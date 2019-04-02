@@ -4,7 +4,7 @@
   ],
   "build-depends" : [ ],
   "depends" : [ ],
-  "description" : "blah blah blah",
+  "description" : "a basic parser of vCard",
   "license" : "Artistic-2.0",
   "name" : "vCard::Parser",
   "perl" : "6.c",
@@ -16,6 +16,8 @@
   "resources" : [ ],
   "source-url" : "https://github.com/petrkol72/vCard-Parser.git",
   "tags" : [ ],
-  "test-depends" : [ ],
+  "test-depends" : [
+    "JSON::Tiny"
+  ],
   "version" : "0.0.1"
 }

@@ -5,12 +5,13 @@ grammar Vcard {
     token endI           { :i 'END:VCARD' };
 
     #logic
-    token contentLine    { [<group> '.']? <propertyName> [ ';' <parameter>]* ':' <propertyValue>+ % ';' };
+    token contentLine    { [<group> '.']? <propertyName> [ ';' <parameter>]* ':' <propertyValue>+ % <[;]> };
 
     token group          { <.alphaNumDash>+ };
         token alphaNumDash   { \w | '-' };
 
-    token propertyValue { <-[\n;]>* };
+    token propertyValue { <propertySingleValue>+ % ',' };
+        token propertySingleValue { [\\ . | <-[\n;,]>]* };
 
     proto token propertyName {*}
     token propertyName:sym<source>          { :i source }
@@ -91,7 +92,7 @@ N:Gump;Forrest;;Mr.;
 FN:Forrest Gump
 ORG:Bubba Gump Shrimp Co.
 TITLE:Shrimp Man
-PHOTO;MEDIATYPE=image/gif;VALUE=uri:http://www.example.com/dir_photos/my_photo.gif
+PHOTO;MEDIATYPE=image/gif:http://www.example.com/dir_photos/my_photo.gif
 TEL;TYPE=work,voice;VALUE=uri:tel:+1-111-555-1212
 TEL;TYPE=home,voice;VALUE=uri:tel:+1-404-555-1212
 ADR;TYPE=work;PREF=1;LABEL="100 Waters Edge\nBaytown\, LA 30314\nUnited States of America":;;100 Waters Edge;Baytown;LA;30314;United States of America
@@ -135,6 +136,14 @@ use JSON::Tiny;
 #.Str.say for Vcard.parse($e).caps;
 
 class vCardToJcard {
+    my %typeOfValue = %(
+        photo => 'uri',
+        tel => 'uri',
+    );
+    method madeValue ($_) {
+            when $_.elems > 1 {$_».made}
+            default {$_[0].made}
+    };
     method TOP ($/) {
         make [
             ["version", %(), "text", "4.0"],
@@ -144,7 +153,7 @@ class vCardToJcard {
     method contentLine ($/) {
         #preparing hashArray of parameters
         my %parameter = %($<parameter>».made);
-        my $parameterOfTypeValue = %parameter<value>[0] // $<selectTypeOfValue>.made;   #default value
+        my $parameterOfTypeValue = %parameter<value>[0] // %typeOfValue{$<propertyName>.lc} // 'text';   #default value
         %parameter<value>:delete;
 
         #add a group to hashArray of parameters if exists
@@ -152,30 +161,21 @@ class vCardToJcard {
             %parameter<group> = $_.Str
         }
 
-        #propertyValue is array, whenever there are more matches found in contentLine
-        my $propertyValue;
-        given $<propertyValue> {
-            when $_.elems > 1 {$propertyValue = $_».made}
-            default {$propertyValue = $_[0].made}
-        }
-
         make [
             $<propertyName>.lc,     
             %parameter,
             $parameterOfTypeValue,
-            $propertyValue
+            $.madeValue($<propertyValue>)
         ]
     };
-    method propertyValue ($/) {
+    method propertySingleValue ($/) {
         make $/.subst( / \\ )> <[,;]> /, Q{}, :g ).subst(/ \\n/, "\n", :g)
     };
+    method propertyValue ($/) {
+        make $.madeValue($<propertySingleValue>)
+    };
     method parameter ($/) {
-        my $value;
-        given $<parameterValue> {
-            when $_.elems > 1 {$value = $_».made}
-            default {$value = $_[0].made}
-        }
-        make $<parameterName>.lc => $value; 
+        make $<parameterName>.lc => $.madeValue($<parameterValue>); 
     };
     method parameterValue ($/) {
         with $<qSafeChar> {make $_.made}
@@ -184,18 +184,19 @@ class vCardToJcard {
     method qSafeChar ($/) {
         make $/.subst(/ \\ )> <[,\;]> /, Q{}, :g ).subst(/ \\n /, "\n", :g)
     };
-    method selectTypeOfValue ($/) {
-        make say 'helo';
-        say $<parameterName>;
-    };
 }
  
-my $rest = Vcard.parse($testCard1, actions => vCardToJcard.new).made;   # ---NW
-say $rest;
+#my $rest = Vcard.parse($testCard1, actions => vCardToJcard.new).made;   # ---NW
+#say $rest;
 
 #dd Vcard.parse($_, actions => vCardToJcard.new, :rule<contentLine>).made for 'TEL;TYPE=work,voice;VALUE=uri:tel:+1-111-555-1212', 'ADR;TYPE=HOME;LABEL="42 Plantation St.\nBaytown\, LA 30314\nUnited States of America":;;42 Plantation St.;Baytown;LA;30314;United States of America', 'CONTACT.FN:Mr. John Q. Public\, Esq.';
 
 use Test;
+
+role DoMade {
+    method made {self};
+};
+say vCardToJcard.madeValue($_) for [1 but DoMade,], [1 but DoMade,2 but DoMade]; #test
 
 #is-deeply $rest, from-json($jCard);    ----NW
 is Vcard.parse($_, actions => vCardToJcard.new, :rule<contentLine>).made[1], "${:group("MyGroup")}", 'Jcard contains a group parameter' with 'MyGroup.ORG:Bubba Gump Shrimp Co.';
@@ -210,7 +211,18 @@ is Vcard.parse($_, :rule<contentLine>).<propertyValue>».Str,('', 'Gump', 'Forre
 #  88891';
 is Vcard.parse($_, :rule<contentLine>).<parameter>, <TYPE=work,voice VALUE=uri>, 'Found parameters: TYPE with values=work, voice; Value with value=uri.' with 'TEL;TYPE=work,voice;VALUE=uri:tel:+1-111-555-1212';
 like Vcard.parse($_, :rule<contentLine>).<parameter>.[0],/^TYPE/, 'First parameterName begins with characters TYPE.' with 'ADR;TYPE=HOME;LABEL="42 Plantation St.\nBaytown\, LA 30314\nUnited States of America":;;42 Plantation St.;Baytown;LA;30314;United States of America';
-ok Vcard.parse($_), "Testcard: \n\n$/ \n\nparsed successfully" for $testCard1, $testCard2;
+cmp-ok Vcard.parse($_, :rule<propertyValue>).<propertySingleValue>».Str, 'eqv', ["My Street", "Left Side", "Second Shack"] with 'My Street,Left Side,Second Shack';
+
+my $jcardAdressMultiValue = from-json '["adr", {}, "text",
+     [
+     "", "",
+     ["My Street", "Left Side", "Second Shack"],
+     "Hometown", "PA", "18252", "U.S.A."
+     ]
+   ]';
+
+cmp-ok Vcard.parse($_, actions => vCardToJcard.new, :rule<contentLine>).made, 'eqv', $jcardAdressMultiValue with 'ADR:;;My Street,Left Side,Second Shack;Hometown;PA;18252;U.S.A.';
+ok Vcard.parse($_), "Testcard: \n\n$/ \n\nparsed successfully\n" for $testCard1, $testCard2;
 
 done-testing;
 
