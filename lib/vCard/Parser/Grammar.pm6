@@ -5,87 +5,141 @@ grammar Vcard {
     token endI           { :i 'END:VCARD' };
 
     #logic
-    token contentLine    { [<group> '.']? <propertyName> [ ';' <parameter>]* ':' <propertyValue>+ % <[;]> };
+    token content-line    { [<group> '.']? <property-name> [ ';' <parameter>]* ':' <property-value>+ % <[;]> };
 
-    token group          { <.alphaNumDash>+ };
-        token alphaNumDash   { \w | '-' };
+    token group          { <.alpha-num-dash>+ };
+        token alpha-num-dash   { \w | '-' };
 
-    token propertyValue { <propertySingleValue>+ % ',' };
-        token propertySingleValue { [\\ . | <-[\n;,]>]* };
+    token property-value { <property-simple-value>+ % ',' };
+        token property-simple-value { [ \\ . | <-[\n;,]> ]* };
 
-    proto token propertyName {*}
-    token propertyName:sym<source>          { :i source }
-    token propertyName:sym<kind>            { :i kind }
-    token propertyName:sym<fn>              { :i fn }
-    token propertyName:sym<n>               { :i n }
-    token propertyName:sym<nickName>        { :i nickName }
-    token propertyName:sym<photo>           { :i photo }
-    token propertyName:sym<bDay>            { :i bDay }
-    token propertyName:sym<anniversary>     { :i anniversary }
-    token propertyName:sym<gender>          { :i gender }
-    token propertyName:sym<adr>             { :i adr }
-    token propertyName:sym<tel>             { :i tel }
-    token propertyName:sym<email>           { :i email }
-    token propertyName:sym<impp>            { :i impp }
-    token propertyName:sym<lang>            { :i lang }
-    token propertyName:sym<tz>              { :i tz }
-    token propertyName:sym<geo>             { :i geo }
-    token propertyName:sym<title>           { :i title }
-    token propertyName:sym<role>            { :i role }
-    token propertyName:sym<logo>            { :i logo }
-    token propertyName:sym<org>             { :i org }
-    token propertyName:sym<member>          { :i member }
-    token propertyName:sym<related>         { :i related }
-    token propertyName:sym<categories>      { :i categories }
-    token propertyName:sym<note>            { :i note }
-    token propertyName:sym<prodid>          { :i prodid }
-    token propertyName:sym<rev>             { :i rev }
-    token propertyName:sym<sound>           { :i sound }
-    token propertyName:sym<uid>             { :i uid }
-    token propertyName:sym<cliendPidMap>    { :i cliendPidMap }
-    token propertyName:sym<url>             { :i url }
-    token propertyName:sym<key>             { :i key }
-    token propertyName:sym<fbUrl>           { :i fbUrl }
-    token propertyName:sym<caladruri>       { :i caladruri }
-    token propertyName:sym<caluri>          { :i caluri }
-    token propertyName:sym<xml>             { :i xml }
-    token propertyName:sym<birthplace>      { :i birthplace }
-    token propertyName:sym<deathplace>      { :i deathplace }
-    token propertyName:sym<deathdate>       { :i deathdate }
-    token propertyName:sym<expertise>       { :i expertise }
-    token propertyName:sym<hobby>           { :i hobby }
-    token propertyName:sym<interest>        { :i interest }
-    token propertyName:sym<org-directory>   { :i org'-'directory }
-    token propertyName:sym<xName>           { <[xX]> '-' <.alphaNumDash>+ }
+    proto token property-name {*}
+    token property-name:sym<source>          { :i source }
+    token property-name:sym<kind>            { :i kind }
+    token property-name:sym<fn>              { :i fn }
+    token property-name:sym<n>               { :i n }
+    token property-name:sym<nickName>        { :i nickName }
+    token property-name:sym<photo>           { :i photo }
+    token property-name:sym<bDay>            { :i bDay }
+    token property-name:sym<anniversary>     { :i anniversary }
+    token property-name:sym<gender>          { :i gender }
+    token property-name:sym<adr>             { :i adr }
+    token property-name:sym<tel>             { :i tel }
+    token property-name:sym<email>           { :i email }
+    token property-name:sym<impp>            { :i impp }
+    token property-name:sym<lang>            { :i lang }
+    token property-name:sym<tz>              { :i tz }
+    token property-name:sym<geo>             { :i geo }
+    token property-name:sym<title>           { :i title }
+    token property-name:sym<role>            { :i role }
+    token property-name:sym<logo>            { :i logo }
+    token property-name:sym<org>             { :i org }
+    token property-name:sym<member>          { :i member }
+    token property-name:sym<related>         { :i related }
+    token property-name:sym<categories>      { :i categories }
+    token property-name:sym<note>            { :i note }
+    token property-name:sym<prodid>          { :i prodid }
+    token property-name:sym<rev>             { :i rev }
+    token property-name:sym<sound>           { :i sound }
+    token property-name:sym<uid>             { :i uid }
+    token property-name:sym<cliendPidMap>    { :i cliendPidMap }
+    token property-name:sym<url>             { :i url }
+    token property-name:sym<key>             { :i key }
+    token property-name:sym<fbUrl>           { :i fbUrl }
+    token property-name:sym<caladruri>       { :i caladruri }
+    token property-name:sym<caluri>          { :i caluri }
+    token property-name:sym<xml>             { :i xml }
+    token property-name:sym<birthplace>      { :i birthplace }
+    token property-name:sym<deathplace>      { :i deathplace }
+    token property-name:sym<deathdate>       { :i deathdate }
+    token property-name:sym<expertise>       { :i expertise }
+    token property-name:sym<hobby>           { :i hobby }
+    token property-name:sym<interest>        { :i interest }
+    token property-name:sym<org-directory>   { :i org'-'directory }
+    token property-name:sym<x-name>           { <[xX]> '-' <.alpha-num-dash>+ }
 
-    token parameter      { <parameterName> '=' <parameterValue>+ % ',' };
-     token parameterValue { <qSafeChar> | <safeChar> };
-        token qSafeChar      { [<["]> <(] ~ [)> <["]>] <-["]>+ };
-        token safeChar       { <-:C-[:;,"]>+ };
+    token parameter      { <parameter-name> '=' <parameter-value>+ % ',' };
+     token parameter-value { <q-safe-char> | <safe-char> };
+        token q-safe-char      { [<["]> <(] ~ [)> <["]>] <-["]>+ };
+        token safe-char       { <-:C-[:;,"]>+ };
 
-    proto token parameterName {*}
-    token parameterName:sym<mediatype>              { :i mediatype }
-    token parameterName:sym<label>                  { :i label }
-    token parameterName:sym<languague>              { :i languague }
-    token parameterName:sym<value>                  { :i value }
-    token parameterName:sym<pref>                   { :i pref }
-    token parameterName:sym<altid>                  { :i altid }
-    token parameterName:sym<type>                   { :i type }
-    token parameterName:sym<pid>                    { :i pid }
-    token parameterName:sym<geo>                    { :i geo }
-    token parameterName:sym<index>                  { :i index }
-    token parameterName:sym<level>                  { :i level }
-    token parameterName:sym<group>                  { :i group }
-    token parameterName:sym<tz>                     { :i tz }
-    token parameterName:sym<sort-as>                { :i sort'-'as }
-    token parameterName:sym<calscale>               { :i calscale }
-    token parameterName:sym<propertyName:xName>     { <.sym> }
+    proto token parameter-name {*}
+    token parameter-name:sym<mediatype>              { :i mediatype }
+    token parameter-name:sym<label>                  { :i label }
+    token parameter-name:sym<languague>              { :i languague }
+    token parameter-name:sym<value>                  { :i value }
+    token parameter-name:sym<pref>                   { :i pref }
+    token parameter-name:sym<altid>                  { :i altid }
+    token parameter-name:sym<type>                   { :i type }
+    token parameter-name:sym<pid>                    { :i pid }
+    token parameter-name:sym<geo>                    { :i geo }
+    token parameter-name:sym<index>                  { :i index }
+    token parameter-name:sym<level>                  { :i level }
+    token parameter-name:sym<group>                  { :i group }
+    token parameter-name:sym<tz>                     { :i tz }
+    token parameter-name:sym<sort-as>                { :i sort'-'as }
+    token parameter-name:sym<calscale>               { :i calscale }
+    token parameter-name:sym<property-name:x-name>     { <.sym> }
 
 
-    token TOP { <begin> \n <version> \n <contentLine>+ %% \n <endI> }
+    token TOP { <begin> \n <version> \n <content-line>+ %% \n <endI> }
 }
 
-my $testCard1 = 
+class Vcard-to-jCard {
+    my %default-type-of-value = %(
+        photo => 'uri',
+        tel => 'uri',
+    );
+    method made-value ($_) {
+            when $_.elems > 1 {$_».made}
+            default {$_[0].made}
+    };
+    method TOP ($/) {
+        make [
+            ["version", %(), "text", "4.0"],
+            |$<content-line>».made;
+        ]
+    };
+    method content-line ($/) {
+        #preparing hashArray of parameters
+        my %parameter = %($<parameter>».made);
+        my $parameter-of-type-value = %parameter<value>[0] // %default-type-of-value{$<property-name>.lc} // 'text';   #default value
+        %parameter<value>:delete;
+
+        #add a group to hashArray of parameters if exists
+        with $<group> {
+            %parameter<group> = $_.Str
+        }
+
+        make [
+            $<property-name>.lc,     
+            %parameter,
+            $parameter-of-type-value,
+            $.made-value($<property-value>)
+        ]
+    };
+    method property-simple-value ($/) {
+        make $/.subst( / \\ )> <[,;]> /, Q{}, :g ).subst(/ \\n/, "\n", :g)
+    };
+    method property-value ($/) {
+        make $.made-value($<property-simple-value>)
+    };
+    method parameter ($/) {
+        make $<parameter-name>.lc => $.made-value($<parameter-value>); 
+    };
+    method parameter-value ($/) {
+        with $<q-safe-char> {make $_.made}
+        orwith $<safe-char> {make $_.Str}
+    };
+    method q-safe-char ($/) {
+        make $/.subst(/ \\ )> <[,\;]> /, Q{}, :g ).subst(/ \\n /, "\n", :g)
+    };
+}
+
+use Test;
+use JSON::Tiny;
+
+my $test-card1 = 
 Q[BEGIN:VCARD
 VERSION:4.0
 N:Gump;Forrest;;Mr.;
@@ -101,12 +155,12 @@ EMAIL:forrestgump@example.com
 x-qq:21588891
 END:VCARD];
 #REV:20080424T195243Z
-my $testCard2=
+my $test-card2 =
 Q[BEGIN:VCARD
 VERSION:4.0
 N:Gump;Forrest;;Mr.;
 END:VCARD];
-my $testJcard = '[
+my $test-jCard = '[
     ["version", {}, "text", "4.0"],
     ["n", {}, "text", ["Gump", "Forrest", "", "Mr.", ""]],
     ["fn", {}, "text", "Forrest Gump"],
@@ -128,101 +182,41 @@ my $testJcard = '[
     ["email", {}, "text", "forrestgump@example.com"]
 ]';
 
-use JSON::Tiny;
-
-#say from-json($jCard);
-
-#Vcard.parse($e).say;
-#.Str.say for Vcard.parse($e).caps;
-
-class vCardToJcard {
-    my %typeOfValue = %(
-        photo => 'uri',
-        tel => 'uri',
-    );
-    method madeValue ($_) {
-            when $_.elems > 1 {$_».made}
-            default {$_[0].made}
-    };
-    method TOP ($/) {
-        make [
-            ["version", %(), "text", "4.0"],
-            |$<contentLine>».made;
-        ]
-    };
-    method contentLine ($/) {
-        #preparing hashArray of parameters
-        my %parameter = %($<parameter>».made);
-        my $parameterOfTypeValue = %parameter<value>[0] // %typeOfValue{$<propertyName>.lc} // 'text';   #default value
-        %parameter<value>:delete;
-
-        #add a group to hashArray of parameters if exists
-        with $<group> {
-            %parameter<group> = $_.Str
-        }
-
-        make [
-            $<propertyName>.lc,     
-            %parameter,
-            $parameterOfTypeValue,
-            $.madeValue($<propertyValue>)
-        ]
-    };
-    method propertySingleValue ($/) {
-        make $/.subst( / \\ )> <[,;]> /, Q{}, :g ).subst(/ \\n/, "\n", :g)
-    };
-    method propertyValue ($/) {
-        make $.madeValue($<propertySingleValue>)
-    };
-    method parameter ($/) {
-        make $<parameterName>.lc => $.madeValue($<parameterValue>); 
-    };
-    method parameterValue ($/) {
-        with $<qSafeChar> {make $_.made}
-        orwith $<safeChar> {make $_.Str}
-    };
-    method qSafeChar ($/) {
-        make $/.subst(/ \\ )> <[,\;]> /, Q{}, :g ).subst(/ \\n /, "\n", :g)
-    };
-}
- 
-#my $rest = Vcard.parse($testCard1, actions => vCardToJcard.new).made;   # ---NW
-#say $rest;
-
-#dd Vcard.parse($_, actions => vCardToJcard.new, :rule<contentLine>).made for 'TEL;TYPE=work,voice;VALUE=uri:tel:+1-111-555-1212', 'ADR;TYPE=HOME;LABEL="42 Plantation St.\nBaytown\, LA 30314\nUnited States of America":;;42 Plantation St.;Baytown;LA;30314;United States of America', 'CONTACT.FN:Mr. John Q. Public\, Esq.';
-
-use Test;
-
-role DoMade {
+role Do-made {
     method made {self};
 };
-say vCardToJcard.madeValue($_) for [1 but DoMade,], [1 but DoMade,2 but DoMade]; #test
+isa-ok Vcard-to-jCard.made-value([1 but Do-made,2 but Do-made]), "Array";
+isa-ok Vcard-to-jCard.made-value([1 but Do-made]), 'Int';
 
-#is-deeply $rest, from-json($jCard);    ----NW
-is Vcard.parse($_, actions => vCardToJcard.new, :rule<contentLine>).made[1], "${:group("MyGroup")}", 'Jcard contains a group parameter' with 'MyGroup.ORG:Bubba Gump Shrimp Co.';
-is-deeply Vcard.parse($_, actions => vCardToJcard.new, :rule<parameter>).made, 'type' => <work voice>.Array, 'Parameter TYPE was converted to lowercase and its value is hashArray of values: work, voice' with 'TYPE=work,voice';
-is-deeply Vcard.parse($_, actions => vCardToJcard.new, :rule<contentLine>).made, $["tel", {:type($["work", "voice"])}, "uri", "tel:+1-111-555-1212"], 'The structure of contentLine is following: string-tel, hashArray-type, string-uri, string-value' with 'TEL;TYPE=work,voice;VALUE=uri:tel:+1-111-555-1212';
-is Vcard.parse($_, actions => vCardToJcard.new, :rule<propertyValue>).made, "United, States; of America", 'Formating propertyValue - testing whether allowed backslashed characters were modified correctly' with 'United\, States\; of America';
-ok Vcard.parse($_, :rule<propertyName>), "A property name can be $_" for <email Email eMail n N fn fN>;
-like Vcard.parse($_, :rule<contentLine>).<propertyValue>,/^Bubba/ with 'ORG:Bubba Gump Shrimp Co.';
-like Vcard.parse($_, :rule<contentLine>).<propertyValue>,/^\d+$/ with 'x-qq:21588891';
-is Vcard.parse($_, :rule<contentLine>).<propertyValue>».Str,('', 'Gump', 'Forrest', '', 'Mr.',''), 'Found 6 propertyValues, including 3 empty in border testing.' with 'N:;Gump;Forrest;;Mr.;';
-# like Vcard.parse($_, :rule<contentLine>).<value>,/\n \h+/ with 'x-qq:215
+#is-deeply Vcard.parse($test-card-1, actions => Vcard-to-jCard.new).made, from-json($test-jCard);
+is Vcard.parse($_, actions => Vcard-to-jCard.new, :rule<content-line>).made[1], "${:group("MyGroup")}", 'Jcard contains a group parameter' with 'MyGroup.ORG:Bubba Gump Shrimp Co.';
+is Vcard.parse($_, :rule<content-line>).<group>, "MyGroup", 'Group occurance test.' with 'MyGroup.ORG;pref=5:Bubba Gump Shrimp Co.';
+nok Vcard.parse($_, :rule<content-line>).<property-name>, 'Missing the property-name is not allowed.' with ';pref=1:Bubba Gump Shrimp Co.';
+nok Vcard.parse($_, :rule<content-line>).<property-name>, 'Usage of non existent property-name is not allowed.' with 'preb:Bubba Gump Shrimp Co.';
+nok Vcard.parse($_, :rule<content-line>).<property-value>, 'Missing the parameter-value is not allowed.' with 'MyGroup.ORG;pref=5';
+is-deeply Vcard.parse($_, actions => Vcard-to-jCard.new, :rule<parameter>).made, 'type' => <work voice>.Array, 'Parameter TYPE was converted to lowercase and its value is hashArray of values: work, voice' with 'TYPE=work,voice';
+is-deeply Vcard.parse($_, actions => Vcard-to-jCard.new, :rule<content-line>).made, $["tel", {:type($["work", "voice"])}, "uri", "tel:+1-111-555-1212"], 'The structure of content-line is following: string-tel, hashArray-type, string-uri, string-value' with 'TEL;TYPE=work,voice;VALUE=uri:tel:+1-111-555-1212';
+is Vcard.parse($_, actions => Vcard-to-jCard.new, :rule<property-value>).made, 'United, States; of A\\merica', 'Formating property-value - testing whether allowed backslashed characters were modified correctly' with 'United\, States\; of A\\merica';
+ok Vcard.parse($_, :rule<property-name>), "A property name can be $_" for <email Email eMail n N fn fN>;
+like Vcard.parse($_, :rule<content-line>).<property-value>,/^Bubba/ with 'ORG:Bubba Gump Shrimp Co.';
+like Vcard.parse($_, :rule<content-line>).<property-value>,/^\d+$/ with 'x-qq:21588891';
+is Vcard.parse($_, :rule<content-line>).<property-value>».Str,('', 'Gump', 'Forrest', '', 'Mr.',''), 'Found 6 propertyValues, including 3 empty in border testing.' with 'N:;Gump;Forrest;;Mr.;';
+# like Vcard.parse($_, :rule<content-line>).<value>,/\n \h+/ with 'x-qq:215
 #  88891';
-is Vcard.parse($_, :rule<contentLine>).<parameter>, <TYPE=work,voice VALUE=uri>, 'Found parameters: TYPE with values=work, voice; Value with value=uri.' with 'TEL;TYPE=work,voice;VALUE=uri:tel:+1-111-555-1212';
-like Vcard.parse($_, :rule<contentLine>).<parameter>.[0],/^TYPE/, 'First parameterName begins with characters TYPE.' with 'ADR;TYPE=HOME;LABEL="42 Plantation St.\nBaytown\, LA 30314\nUnited States of America":;;42 Plantation St.;Baytown;LA;30314;United States of America';
-cmp-ok Vcard.parse($_, :rule<propertyValue>).<propertySingleValue>».Str, 'eqv', ["My Street", "Left Side", "Second Shack"] with 'My Street,Left Side,Second Shack';
+is Vcard.parse($_, :rule<content-line>).<parameter>, <TYPE=work,voice VALUE=uri>, 'Found parameters: TYPE with values=work, voice; Value with value=uri.' with 'TEL;TYPE=work,voice;VALUE=uri:tel:+1-111-555-1212';
+like Vcard.parse($_, :rule<content-line>).<parameter>.[0],/^TYPE/, 'First parameter-name begins with characters TYPE.' with 'ADR;TYPE=HOME;LABEL="42 Plantation St.\nBaytown\, LA 30314\nUnited States of America":;;42 Plantation St.;Baytown;LA;30314;United States of America';
+cmp-ok Vcard.parse($_, :rule<property-value>).<property-simple-value>».Str, 'eqv', ["My Street", "Left Side", "Second Shack"], 'property-value makes an array with three items of a property-simple-value type' with 'My Street,Left Side,Second Shack';
 
-my $jcardAdressMultiValue = from-json '["adr", {}, "text",
-     [
+my $jCard-multi-value = from-json '["adr", {}, "text",
+    [
      "", "",
      ["My Street", "Left Side", "Second Shack"],
      "Hometown", "PA", "18252", "U.S.A."
-     ]
-   ]';
+    ]
+]';
+cmp-ok Vcard.parse($_, actions => Vcard-to-jCard.new, :rule<content-line>).made, 'eqv', $jCard-multi-value, 'Equality testing - jCard from-json contains an array in property-value' with 'ADR:;;My Street,Left Side,Second Shack;Hometown;PA;18252;U.S.A.';
 
-cmp-ok Vcard.parse($_, actions => vCardToJcard.new, :rule<contentLine>).made, 'eqv', $jcardAdressMultiValue with 'ADR:;;My Street,Left Side,Second Shack;Hometown;PA;18252;U.S.A.';
-ok Vcard.parse($_), "Testcard: \n\n$/ \n\nparsed successfully\n" for $testCard1, $testCard2;
+ok Vcard.parse($_), "Testcard: \n\n$/ \n\n...parsed successfully\n" for $test-card1, $test-card2;
 
 done-testing;
 
