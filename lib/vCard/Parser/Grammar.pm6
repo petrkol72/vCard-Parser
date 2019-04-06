@@ -1,26 +1,26 @@
 grammar Vcard {
     #required
-    token version        { :i 'Version:4.0' };
-    token begin          { :i 'BEGIN:VCARD' };
-    token endI           { :i 'END:VCARD' };
+    token version  { :i 'Version:4.0' };
+    token begin    { :i 'BEGIN:VCARD' };
+    token endI     { :i 'END:VCARD'   };
 
     #logic
-    token content-line    { [<group> '.']? <property-name> [ ';' <parameter>]* ':' <property-value>+ % <[;]> };
+    token content-line  { [<group> '.']? <property-name> [ ';' <parameter>]* ':' <property-value>+ % <[;]> };
 
-    token group          { <.alpha-num-dash>+ };
-        token alpha-num-dash   { \w | '-' };
+    token group         { <.alpha-num-dash>+ };
+        token alpha-num-dash { \w | '-' };
 
-    token property-value { <property-simple-value>+ % ',' };
-        token property-simple-value { [ \\ . | <-[\n;,]> ]* };
+    token property-value  { <property-simple-value>+ % ',' };
+        token property-simple-value  { [ \\ . | <-[\n;,]> ]* };
 
     proto token property-name {*}
     token property-name:sym<source>          { :i source }
     token property-name:sym<kind>            { :i kind }
     token property-name:sym<fn>              { :i fn }
     token property-name:sym<n>               { :i n }
-    token property-name:sym<nickName>        { :i nickName }
+    token property-name:sym<nickname>        { :i nickname }
     token property-name:sym<photo>           { :i photo }
-    token property-name:sym<bDay>            { :i bDay }
+    token property-name:sym<bday>            { :i bday }
     token property-name:sym<anniversary>     { :i anniversary }
     token property-name:sym<gender>          { :i gender }
     token property-name:sym<adr>             { :i adr }
@@ -42,10 +42,10 @@ grammar Vcard {
     token property-name:sym<rev>             { :i rev }
     token property-name:sym<sound>           { :i sound }
     token property-name:sym<uid>             { :i uid }
-    token property-name:sym<cliendPidMap>    { :i cliendPidMap }
+    token property-name:sym<clientpidmap>    { :i clientpidmap }
     token property-name:sym<url>             { :i url }
     token property-name:sym<key>             { :i key }
-    token property-name:sym<fbUrl>           { :i fbUrl }
+    token property-name:sym<fburl>           { :i fburl }
     token property-name:sym<caladruri>       { :i caladruri }
     token property-name:sym<caluri>          { :i caluri }
     token property-name:sym<xml>             { :i xml }
@@ -56,11 +56,11 @@ grammar Vcard {
     token property-name:sym<hobby>           { :i hobby }
     token property-name:sym<interest>        { :i interest }
     token property-name:sym<org-directory>   { :i org'-'directory }
-    token property-name:sym<x-name>           { <[xX]> '-' <.alpha-num-dash>+ }
+    token property-name:sym<x-name>          { <[xX]> '-' <.alpha-num-dash>+ }
 
-    token parameter      { <parameter-name> '=' <parameter-value>+ % ',' };
-     token parameter-value { <q-safe-char> | <safe-char> };
-        token q-safe-char      { [<["]> <(] ~ [)> <["]>] <-["]>+ };
+    token parameter  { <parameter-name> '=' <parameter-value>+ % ',' };
+     token parameter-value  { <q-safe-char> | <safe-char> };
+        token q-safe-char     { [<["]> <(] ~ [)> <["]>] <-["]>+ };
         token safe-char       { <-:C-[:;,"]>+ };
 
     proto token parameter-name {*}
@@ -87,8 +87,48 @@ grammar Vcard {
 
 class Vcard-to-jCard {
     my %default-type-of-value = %(
+        source => 'uri',
         photo => 'uri',
+        member => 'uri',
         tel => 'uri',
+        geo => 'uri',
+        url => 'uri',
+        key => 'uri',
+        caladruri => 'uri',
+        fburl => 'uri',
+        caluri => 'uri',
+        related => 'uri',
+        logo => 'uri',
+        sound => 'uri',
+        uid => 'uri',
+        clientpidmap => 'uri',
+        impp => 'uri',
+        org-directory => 'uri',
+        adr => 'text',
+        email => 'text',
+        org => 'text',
+        birthplace => 'text',
+        deathplace => 'text',
+        expertise => 'text',
+        hobby => 'text',
+        interest => 'text',
+        title => 'text',
+        role => 'text',
+        categories => 'text',
+        kind => 'text',
+        note => 'text',
+        prodid => 'text',
+        xml => 'text',
+        fn => 'text',
+        n => 'text',
+        nickname => 'text',
+        gender => 'text',
+        tz => 'text',
+        bday => 'date-and-or-time',
+        anniversary => 'date-and-or-time',
+        deathdate => 'date-and-or-time',
+        lang => 'language-tag',
+        rev => 'timestamp',
     );
     method made-value ($_) {
             when $_.elems > 1 {$_».made}
@@ -103,7 +143,7 @@ class Vcard-to-jCard {
     method content-line ($/) {
         #preparing hashArray of parameters
         my %parameter = %($<parameter>».made);
-        my $parameter-of-type-value = %parameter<value>[0] // %default-type-of-value{$<property-name>.lc} // 'text';   #default value
+        my $parameter-of-type-value = %parameter<value>[0] // %default-type-of-value{$<property-name>.lc} // 'unknown';
         %parameter<value>:delete;
 
         #add a group to hashArray of parameters if exists
@@ -160,6 +200,24 @@ Q[BEGIN:VCARD
 VERSION:4.0
 N:Gump;Forrest;;Mr.;
 END:VCARD];
+my $test-card3 = 
+Q[BEGIN:VCARD
+VERSION:4.0
+KIND:group
+FN:The Doe family
+MEMBER:urn:uuid:03a0e51f-d1aa-4385-8a53-e29025acd8af
+MEMBER:urn:uuid:b8767877-b4a1-4c70-9acc-505d3819e519
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+FN:John Doe
+UID:urn:uuid:03a0e51f-d1aa-4385-8a53-e29025acd8af
+END:VCARD
+BEGIN:VCARD
+VERSION:4.0
+FN:Jane Doe
+UID:urn:uuid:b8767877-b4a1-4c70-9acc-505d3819e519
+END:VCARD];
 my $test-jCard = '[
     ["version", {}, "text", "4.0"],
     ["n", {}, "text", ["Gump", "Forrest", "", "Mr.", ""]],
@@ -203,6 +261,19 @@ like Vcard.parse($_, :rule<content-line>).<property-value>,/^\d+$/ with 'x-qq:21
 is Vcard.parse($_, :rule<content-line>).<property-value>».Str,('', 'Gump', 'Forrest', '', 'Mr.',''), 'Found 6 propertyValues, including 3 empty in border testing.' with 'N:;Gump;Forrest;;Mr.;';
 # like Vcard.parse($_, :rule<content-line>).<value>,/\n \h+/ with 'x-qq:215
 #  88891';
+
+my %type-of-property-value = %(
+    'x-qq:21588891' => 'unknown',
+    'group.X-prop:tel:454' => 'unknown',
+    'TEL;TYPE=work,voice;VALUE=uri:tel:+1-111-555-1212' => 'uri',
+    'EMAIL;PID=4.2,5.1:jdoe@example.com' => 'text',
+    'EMAIL;PID=4.2,5.1;VALUE=date:jdoe@example.com' => 'date',
+    'ANNIVERSARY:20090808T1430-0500' => 'date-and-or-time',
+);
+for %type-of-property-value.pairs {
+    is my $tmp = Vcard.parse($_.key, actions => Vcard-to-jCard.new, :rule<content-line>).made[2], $_.value, "A type of property-value for: $/ is: $tmp";
+};
+
 is Vcard.parse($_, :rule<content-line>).<parameter>, <TYPE=work,voice VALUE=uri>, 'Found parameters: TYPE with values=work, voice; Value with value=uri.' with 'TEL;TYPE=work,voice;VALUE=uri:tel:+1-111-555-1212';
 like Vcard.parse($_, :rule<content-line>).<parameter>.[0],/^TYPE/, 'First parameter-name begins with characters TYPE.' with 'ADR;TYPE=HOME;LABEL="42 Plantation St.\nBaytown\, LA 30314\nUnited States of America":;;42 Plantation St.;Baytown;LA;30314;United States of America';
 cmp-ok Vcard.parse($_, :rule<property-value>).<property-simple-value>».Str, 'eqv', ["My Street", "Left Side", "Second Shack"], 'property-value makes an array with three items of a property-simple-value type' with 'My Street,Left Side,Second Shack';
