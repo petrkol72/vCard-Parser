@@ -82,10 +82,10 @@ grammar Vcard {
     token parameter-name:sym<property-name:x-name>     { <.sym> }
 
 
-    token TOP { <begin> \n <version> \n <content-line>+ %% \n <endI> }
+    token TOP { [<begin> \n <version> \n <content-line>+ %% \n <endI>]+ % \n }
 }
 
-class Vcard-to-jCard {
+class vCard-to-jCard {
     my %default-type-of-value = %(
         source => 'uri',
         photo => 'uri',
@@ -135,9 +135,11 @@ class Vcard-to-jCard {
             default {$_[0].made}
     };
     method TOP ($/) {
-        make [
+        make ["vcard",
+          [
             ["version", %(), "text", "4.0"],
             |$<content-line>».made;
+          ]
         ]
     };
     method content-line ($/) {
@@ -218,7 +220,8 @@ VERSION:4.0
 FN:Jane Doe
 UID:urn:uuid:b8767877-b4a1-4c70-9acc-505d3819e519
 END:VCARD];
-my $test-jCard = '[
+my $test-jCard = '["vcard",
+  [
     ["version", {}, "text", "4.0"],
     ["n", {}, "text", ["Gump", "Forrest", "", "Mr.", ""]],
     ["fn", {}, "text", "Forrest Gump"],
@@ -238,23 +241,24 @@ my $test-jCard = '[
       ["", "", "42 Plantation St.", "Baytown", "LA", "30314", "United States of America"]
     ],
     ["email", {}, "text", "forrestgump@example.com"]
+  ]
 ]';
 
 role Do-made {
     method made {self};
 };
-isa-ok Vcard-to-jCard.made-value([1 but Do-made,2 but Do-made]), "Array";
-isa-ok Vcard-to-jCard.made-value([1 but Do-made]), 'Int';
+isa-ok vCard-to-jCard.made-value([1 but Do-made,2 but Do-made]), "Array";
+isa-ok vCard-to-jCard.made-value([1 but Do-made]), 'Int';
 
-#is-deeply Vcard.parse($test-card-1, actions => Vcard-to-jCard.new).made, from-json($test-jCard);
-is Vcard.parse($_, actions => Vcard-to-jCard.new, :rule<content-line>).made[1], "${:group("MyGroup")}", 'Jcard contains a group parameter' with 'MyGroup.ORG:Bubba Gump Shrimp Co.';
+#is-deeply Vcard.parse($test-card1, actions => vCard-to-jCard.new).made, from-json($test-jCard);
+is Vcard.parse($_, actions => vCard-to-jCard.new, :rule<content-line>).made[1], "${:group("MyGroup")}", 'Jcard contains a group parameter' with 'MyGroup.ORG:Bubba Gump Shrimp Co.';
 is Vcard.parse($_, :rule<content-line>).<group>, "MyGroup", 'Group occurance test.' with 'MyGroup.ORG;pref=5:Bubba Gump Shrimp Co.';
 nok Vcard.parse($_, :rule<content-line>).<property-name>, 'Missing the property-name is not allowed.' with ';pref=1:Bubba Gump Shrimp Co.';
 nok Vcard.parse($_, :rule<content-line>).<property-name>, 'Usage of non existent property-name is not allowed.' with 'preb:Bubba Gump Shrimp Co.';
 nok Vcard.parse($_, :rule<content-line>).<property-value>, 'Missing the parameter-value is not allowed.' with 'MyGroup.ORG;pref=5';
-is-deeply Vcard.parse($_, actions => Vcard-to-jCard.new, :rule<parameter>).made, 'type' => <work voice>.Array, 'Parameter TYPE was converted to lowercase and its value is hashArray of values: work, voice' with 'TYPE=work,voice';
-is-deeply Vcard.parse($_, actions => Vcard-to-jCard.new, :rule<content-line>).made, $["tel", {:type($["work", "voice"])}, "uri", "tel:+1-111-555-1212"], 'The structure of content-line is following: string-tel, hashArray-type, string-uri, string-value' with 'TEL;TYPE=work,voice;VALUE=uri:tel:+1-111-555-1212';
-is Vcard.parse($_, actions => Vcard-to-jCard.new, :rule<property-value>).made, 'United, States; of A\\merica', 'Formating property-value - testing whether allowed backslashed characters were modified correctly' with 'United\, States\; of A\\merica';
+is-deeply Vcard.parse($_, actions => vCard-to-jCard.new, :rule<parameter>).made, 'type' => <work voice>.Array, 'Parameter TYPE was converted to lowercase and its value is hashArray of values: work, voice' with 'TYPE=work,voice';
+is-deeply Vcard.parse($_, actions => vCard-to-jCard.new, :rule<content-line>).made, $["tel", {:type($["work", "voice"])}, "uri", "tel:+1-111-555-1212"], 'The structure of content-line is following: string-tel, hashArray-type, string-uri, string-value' with 'TEL;TYPE=work,voice;VALUE=uri:tel:+1-111-555-1212';
+is Vcard.parse($_, actions => vCard-to-jCard.new, :rule<property-value>).made, 'United, States; of A\\merica', 'Formating property-value - testing whether allowed backslashed characters were modified correctly' with 'United\, States\; of A\\merica';
 ok Vcard.parse($_, :rule<property-name>), "A property name can be $_" for <email Email eMail n N fn fN>;
 like Vcard.parse($_, :rule<content-line>).<property-value>,/^Bubba/ with 'ORG:Bubba Gump Shrimp Co.';
 like Vcard.parse($_, :rule<content-line>).<property-value>,/^\d+$/ with 'x-qq:21588891';
@@ -271,7 +275,7 @@ my %type-of-property-value = %(
     'ANNIVERSARY:20090808T1430-0500' => 'date-and-or-time',
 );
 for %type-of-property-value.pairs {
-    is my $tmp = Vcard.parse($_.key, actions => Vcard-to-jCard.new, :rule<content-line>).made[2], $_.value, "A type of property-value for: $/ is: $tmp";
+    is my $tmp = Vcard.parse($_.key, actions => vCard-to-jCard.new, :rule<content-line>).made[2], $_.value, "A type of property-value for: $/ is: $tmp";
 };
 
 is Vcard.parse($_, :rule<content-line>).<parameter>, <TYPE=work,voice VALUE=uri>, 'Found parameters: TYPE with values=work, voice; Value with value=uri.' with 'TEL;TYPE=work,voice;VALUE=uri:tel:+1-111-555-1212';
@@ -285,9 +289,9 @@ my $jCard-multi-value = from-json '["adr", {}, "text",
      "Hometown", "PA", "18252", "U.S.A."
     ]
 ]';
-cmp-ok Vcard.parse($_, actions => Vcard-to-jCard.new, :rule<content-line>).made, 'eqv', $jCard-multi-value, 'Equality testing - jCard from-json contains an array in property-value' with 'ADR:;;My Street,Left Side,Second Shack;Hometown;PA;18252;U.S.A.';
+cmp-ok Vcard.parse($_, actions => vCard-to-jCard.new, :rule<content-line>).made, 'eqv', $jCard-multi-value, 'Equality testing - jCard from-json contains an array in property-value' with 'ADR:;;My Street,Left Side,Second Shack;Hometown;PA;18252;U.S.A.';
 
-ok Vcard.parse($_), "Testcard: \n\n$/ \n\n...parsed successfully\n" for $test-card1, $test-card2;
+ok Vcard.parse($_), "Testcard: \n\n$/ \n\n...parsed successfully\n" for $test-card1, $test-card2, $test-card3;
 
 done-testing;
 
