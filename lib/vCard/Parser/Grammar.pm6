@@ -64,25 +64,26 @@ grammar Vcard {
         token safe-char       { <-:C-[:;,"]>+ };
 
     proto token parameter-name {*}
-    token parameter-name:sym<mediatype>              { :i mediatype }
-    token parameter-name:sym<label>                  { :i label }
-    token parameter-name:sym<languague>              { :i languague }
-    token parameter-name:sym<value>                  { :i value }
-    token parameter-name:sym<pref>                   { :i pref }
-    token parameter-name:sym<altid>                  { :i altid }
-    token parameter-name:sym<type>                   { :i type }
-    token parameter-name:sym<pid>                    { :i pid }
-    token parameter-name:sym<geo>                    { :i geo }
-    token parameter-name:sym<index>                  { :i index }
-    token parameter-name:sym<level>                  { :i level }
-    token parameter-name:sym<group>                  { :i group }
-    token parameter-name:sym<tz>                     { :i tz }
-    token parameter-name:sym<sort-as>                { :i sort'-'as }
-    token parameter-name:sym<calscale>               { :i calscale }
-    token parameter-name:sym<property-name:x-name>     { <.sym> }
+    token parameter-name:sym<mediatype>       { :i mediatype }
+    token parameter-name:sym<label>           { :i label }
+    token parameter-name:sym<languague>       { :i languague }
+    token parameter-name:sym<value>           { :i value }
+    token parameter-name:sym<pref>            { :i pref }
+    token parameter-name:sym<altid>           { :i altid }
+    token parameter-name:sym<type>            { :i type }
+    token parameter-name:sym<pid>             { :i pid }
+    token parameter-name:sym<geo>             { :i geo }
+    token parameter-name:sym<index>           { :i index }
+    token parameter-name:sym<level>           { :i level }
+    token parameter-name:sym<group>           { :i group }
+    token parameter-name:sym<tz>              { :i tz }
+    token parameter-name:sym<sort-as>         { :i sort'-'as }
+    token parameter-name:sym<calscale>        { :i calscale }
+    token parameter-name:sym<x-name>          { <[xX]> '-' <.alpha-num-dash>+ }
 
+    token vcard { <begin> \n <version> \n <content-line>+ %% \n <endI> };
 
-    token TOP { [<begin> \n <version> \n <content-line>+ %% \n <endI>]+ % \n }
+    token TOP { <vcard>+ %% \n }
 }
 
 class vCard-to-jCard {
@@ -244,6 +245,8 @@ my $test-jCard = '["vcard",
   ]
 ]';
 
+ok Vcard.parse($_), "Testcard: \n\n$/ \n\n..........\n" for $test-card1, $test-card2, $test-card3;
+
 role Do-made {
     method made {self};
 };
@@ -262,6 +265,7 @@ is Vcard.parse($_, actions => vCard-to-jCard.new, :rule<property-value>).made, '
 ok Vcard.parse($_, :rule<property-name>), "A property name can be $_" for <email Email eMail n N fn fN>;
 like Vcard.parse($_, :rule<content-line>).<property-value>,/^Bubba/ with 'ORG:Bubba Gump Shrimp Co.';
 like Vcard.parse($_, :rule<content-line>).<property-value>,/^\d+$/ with 'x-qq:21588891';
+like Vcard.parse($_, :rule<content-line>).<parameter>».<parameter-name>, /^X'-'\w+$/ with 'x-prop;X-param=val:Joseph Com.';
 is Vcard.parse($_, :rule<content-line>).<property-value>».Str,('', 'Gump', 'Forrest', '', 'Mr.',''), 'Found 6 propertyValues, including 3 empty in border testing.' with 'N:;Gump;Forrest;;Mr.;';
 # like Vcard.parse($_, :rule<content-line>).<value>,/\n \h+/ with 'x-qq:215
 #  88891';
@@ -291,7 +295,8 @@ my $jCard-multi-value = from-json '["adr", {}, "text",
 ]';
 cmp-ok Vcard.parse($_, actions => vCard-to-jCard.new, :rule<content-line>).made, 'eqv', $jCard-multi-value, 'Equality testing - jCard from-json contains an array in property-value' with 'ADR:;;My Street,Left Side,Second Shack;Hometown;PA;18252;U.S.A.';
 
-ok Vcard.parse($_), "Testcard: \n\n$/ \n\n...parsed successfully\n" for $test-card1, $test-card2, $test-card3;
+is Vcard.parse($_).<vcard>.elems, 3,"vCard contains 3 vcards." with $test-card3;
+is Vcard.parse($_).<vcard>.elems, 1,"vCard contains 1 vcard." with $test-card2;
 
 done-testing;
 
