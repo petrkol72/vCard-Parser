@@ -1,9 +1,12 @@
 os:
   - linux
-  - osx
+#  - osx
 language: perl6
-perl6:
-  - latest
+#perl6:
+#  - latest
 install:
   - rakudobrew build zef
-  - zef install --debug --deps-only --/test .
+  - zef install --debug --deps-only .
+# script:
+#  - PERL6LIB=$PWD/lib prove -e perl6 -vr t/
+#sudo: false
