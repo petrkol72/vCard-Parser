@@ -47,7 +47,8 @@ unit class vCard::Parser::Actions;
             when $_.elems > 1 {$_».made}
             default {$_[0].made}
     };
-    method TOP ($/) {
+    method TOP ($/) { make $<vcard>».made }
+    method vcard ($/) {
         make ["vcard",
           [
             ["version", %(), "text", "4.0"],
