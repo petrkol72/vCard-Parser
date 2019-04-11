@@ -8,7 +8,7 @@ sub line-folding (Str $_) {
     return $_.subst(/ \n [ ' ' | \t ] /, Q{}, :g);
 };
 
-sub from-vCard ($_) {
+sub from-vCard ($_) is export {
     my $preprocessed-vcard = line-folding($_);
     sub parser (|c) {vCard::Parser::Grammar.parse(|c)};
     my $vcard = parser($preprocessed-vcard, actions => vCard::Parser::Actions.new);
@@ -29,7 +29,17 @@ vCard::Parser - a basic parser of vCard
 =begin code :lang<perl6>
 
 use vCard::Parser;
-say from-vCard($vCard-string);
+
+my $vcard = 'BEGIN:VCARD
+VERSION:4.0
+N:Gump;Forrest;;Mr.;
+x-qq:21588891
+END:VCARD';
+
+say from-vCard($vcard);
+
+use JSON::Tiny;
+say to-json(from-vCard($vcard)); #Output is jCard
 
 =end code
 

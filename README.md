@@ -10,7 +10,17 @@ SYNOPSIS
 
 ```perl6
 use vCard::Parser;
-say from-vCard($vCard-string);
+
+my $vcard = 'BEGIN:VCARD
+VERSION:4.0
+N:Gump;Forrest;;Mr.;
+x-qq:21588891
+END:VCARD';
+
+say from-vCard($vcard);
+
+use JSON::Tiny;
+say to-json(from-vCard($vcard)); #Output is jCard
 ```
 
 DESCRIPTION
