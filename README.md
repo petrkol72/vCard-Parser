@@ -10,7 +10,7 @@ SYNOPSIS
 
 ```perl6
 use vCard::Parser;
-say vCard-to-jCard($vCard-string);
+say from-vCard($vCard-string);
 ```
 
 DESCRIPTION

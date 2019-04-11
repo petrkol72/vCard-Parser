@@ -1,6 +1,6 @@
-use v6.d;#error - version support
-use vCard::Parser::Grammar;#error linking
-use vCard::Parser::Actions;#error linking
+use v6.d;
+use vCard::Parser::Grammar;
+use vCard::Parser::Actions;
 
 unit class vCard::Parser:ver<0.0.1>;
 
@@ -8,18 +8,15 @@ sub line-folding (Str $_) {
     return $_.subst(/ \n [ ' ' | \t ] /, Q{}, :g);
 };
 
-multi vCard-to-jCard (Str $_) {
+sub from-vCard ($_) {
     my $preprocessed-vcard = line-folding($_);
-    my $vcard = vCard.parse($preprocessed-vcard, actions => vCard::Parser::Actions.new);
-    with $vcard { return $vcard.made }
-    else { return };
+    sub parser (|c) {vCard::Parser::Grammar.parse(|c)};
+    my $vcard = parser($preprocessed-vcard, actions => vCard::Parser::Actions.new);
+    with $vcard { 
+        return $_.made
+    };
 };
 
-my $test-card2 =
-Q[BEGIN:VCARD
-VERSION:4.0
-N:Gump;Forrest;;Mr.;
-END:VCARD];
 
 =begin pod
 
@@ -32,7 +29,7 @@ vCard::Parser - a basic parser of vCard
 =begin code :lang<perl6>
 
 use vCard::Parser;
-say vCard-to-jCard($vCard-string);
+say from-vCard($vCard-string);
 
 =end code
 
