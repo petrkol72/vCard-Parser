@@ -10,12 +10,23 @@ SYNOPSIS
 
 ```perl6
 use vCard::Parser;
+
+my $vcard = 'BEGIN:VCARD
+VERSION:4.0
+N:Gump;Forrest;;Mr.;
+x-qq:21588891
+END:VCARD';
+
+say from-vCard($vcard);
+
+use JSON::Tiny;
+say to-json(from-vCard($vcard)); #Output is jCard
 ```
 
 DESCRIPTION
 ===========
 
-vCard::Parser is a basic parser of vCard version 4.0 and it's convertor to JSON format.
+vCard::Parser is a basic parser of vCard files of version 4.0. It also serves as it's convertor to jCard, which is a JSON format for vCard data.
 
 AUTHOR
 ======

@@ -15,8 +15,14 @@
   },
   "resources" : [ ],
   "source-url" : "https://github.com/petrkol72/vCard-Parser.git",
-  "tags" : [ ],
+  "tags" : [
+    "Grammar",
+    "Parse",
+    "Parsing",
+    "Parser"
+  ],
   "test-depends" : [
+    "Test::META",
     "JSON::Tiny"
   ],
   "version" : "0.0.1"
