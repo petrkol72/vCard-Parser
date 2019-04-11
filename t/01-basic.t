@@ -1,7 +1,12 @@
 use v6.d;
 use Test;
-use vCard::Parser;
+use Test::META;
+#use vCard::Parser;
 
-pass "replace me";
+plan 2;
+
+use-ok 'vCard::Parser';
+
+meta-ok();
 
 done-testing;
