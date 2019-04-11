@@ -4,71 +4,8 @@ use vCard::Parser::Grammar;
 
 my $vcard-grammar = vCard::Parser::Grammar.new;
 
-my $test-card1 = 
-Q[BEGIN:VCARD
-VERSION:4.0
-N:Gump;Forrest;;Mr.;
-FN:Forrest Gump
-ORG:Bubba Gump Shrimp Co.
-TITLE:Shrimp Man
-PHOTO;MEDIATYPE=image/gif:http://www.example.com/dir_photos/my_photo.gif
-TEL;TYPE=work,voice;VALUE=uri:tel:+1-111-555-1212
-TEL;TYPE=home,voice;VALUE=uri:tel:+1-404-555-1212
-ADR;TYPE=work;PREF=1;LABEL="100 Waters Edge\nBaytown\, LA 30314\nUnited States of America":;;100 Waters Edge;Baytown;LA;30314;United States of America
-ADR;TYPE=home;LABEL="42 Plantation St.\nBaytown\, LA 30314\nUnited States of America":;;42 Plantation St.;Baytown;LA;30314;United States of America
-EMAIL:forrestgump@example.com
-x-qq:21588891
-END:VCARD];
-#REV:20080424T195243Z
-my $test-card2 =
-Q[BEGIN:VCARD
-VERSION:4.0
-N:Gump;Forrest;;Mr.;
-END:VCARD];
-my $test-card3 = 
-Q[BEGIN:VCARD
-VERSION:4.0
-KIND:group
-FN:The Doe family
-MEMBER:urn:uuid:03a0e51f-d1aa-4385-8a53-e29025acd8af
-MEMBER:urn:uuid:b8767877-b4a1-4c70-9acc-505d3819e519
-END:VCARD
-BEGIN:VCARD
-VERSION:4.0
-FN:John Doe
-UID:urn:uuid:03a0e51f-d1aa-4385-8a53-e29025acd8af
-END:VCARD
-BEGIN:VCARD
-VERSION:4.0
-FN:Jane Doe
-UID:urn:uuid:b8767877-b4a1-4c70-9acc-505d3819e519
-END:VCARD];
-my $test-jCard = '["vcard",
-  [
-    ["version", {}, "text", "4.0"],
-    ["n", {}, "text", ["Gump", "Forrest", "", "Mr.", ""]],
-    ["fn", {}, "text", "Forrest Gump"],
-    ["org", {}, "text", "Bubba Gump Shrimp Co."],
-    ["title", {} ,"text", "Shrimp Man"],
-    ["photo", {"mediatype":"image/gif"}, "uri", "http://www.example.com/dir_photos/my_photo.gif"],
-    ["tel", {"type":["work", "voice"]}, "uri", "tel:+1-111-555-1212"],
-    ["tel", {"type":["home", "voice"]}, "uri", "tel:+1-404-555-1212"],
-    ["adr",
-      {"label":"100 Waters Edge\nBaytown, LA 30314\nUnited States of America", "type":"work", "pref":"1"},
-      "text",
-      ["", "", "100 Waters Edge", "Baytown", "LA", "30314", "United States of America"]
-    ],
-    ["adr",
-      {"label":"42 Plantation St.\nBaytown, LA 30314\nUnited States of America", "type":"home"},
-      "text",
-      ["", "", "42 Plantation St.", "Baytown", "LA", "30314", "United States of America"]
-    ],
-    ["email", {}, "text", "forrestgump@example.com"]
-  ]
-]';
 
-
-ok $vcard-grammar.parse($_), "Testcard: \n\n$/ \n\n..........\n" for $test-card1, $test-card2, $test-card3;
+ok $vcard-grammar.parsefile($_), "Testcard: \n\n$/ \n\n..........\n" for './t/test-cards/test-card1.vcard', './t/test-cards/test-card2.vcard', './t/test-cards/test-card4.vcard';
 
 ok $vcard-grammar.parse($_, :rule<property-name>), "A property name can be $_" for <email Email eMail n N fn fN>;
 like $vcard-grammar.parse($_, :rule<content-line>).<property-value>,/^Bubba/ with 'ORG:Bubba Gump Shrimp Co.';
@@ -78,8 +15,8 @@ is $vcard-grammar.parse($_, :rule<content-line>).<property-value>».Str,('', 'Gu
 # like $vcard-grammar.parse($_, :rule<content-line>).<value>,/\n \h+/ with 'x-qq:215
 #  88891';
 
-is $vcard-grammar.parse($_).<vcard>.elems, 3,"$vcard-grammar contains 3 vcards." with $test-card3;
-is $vcard-grammar.parse($_).<vcard>.elems, 1,"$vcard-grammar contains 1 vcard." with $test-card2;
+is $vcard-grammar.parsefile($_).<vcard>.elems, 3,"$vcard-grammar contains 3 vcards." with './t/test-cards/test-card4.vcard';
+is $vcard-grammar.parsefile($_).<vcard>.elems, 1,"$vcard-grammar contains 1 vcard." with './t/test-cards/test-card2.vcard';
 
 is $vcard-grammar.parse($_, :rule<content-line>).<group>, "MyGroup", 'Group occurance test.' with 'MyGroup.ORG;pref=5:Bubba Gump Shrimp Co.';
 nok $vcard-grammar.parse($_, :rule<content-line>).<property-name>, 'Missing the property-name is not allowed.' with ';pref=1:Bubba Gump Shrimp Co.';
