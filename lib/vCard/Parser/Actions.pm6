@@ -48,7 +48,7 @@ method made-value ($_) {
         when $_.elems > 1 {$_».made}
         default {$_[0].made}
 };
-method TOP ($/) { make $<vcard>».made }
+method TOP ($/) { make $.made-value($<vcard>) }
 method vcard ($/) {
     make ["vcard",
       [
