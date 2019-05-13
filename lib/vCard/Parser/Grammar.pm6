@@ -69,7 +69,7 @@ token parameter  { <parameter-name> '=' <parameter-value>+ % ',' };
 proto token parameter-name {*}
 token parameter-name:sym<mediatype>       { :i mediatype }
 token parameter-name:sym<label>           { :i label }
-token parameter-name:sym<languague>       { :i languague }
+token parameter-name:sym<language>        { :i language }
 token parameter-name:sym<value>           { :i value }
 token parameter-name:sym<pref>            { :i pref }
 token parameter-name:sym<altid>           { :i altid }
